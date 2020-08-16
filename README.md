@@ -103,4 +103,11 @@ imgscout.del key id
 deletes the id from the index. Returns OK status.
 
 
+## Client Demo Program
+
+Use the `imgscoutclient` utility to add or query the image files
+in a given directory.  Run `./imgscoutclient -h` for all the options.
+After adding files, be sure to run `./imgscoutclient --cmd sync --key mykey`
+to add the recent additions to the index structure.  
+
 
