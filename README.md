@@ -43,7 +43,7 @@ module unload imgscout
 module list
 ```
 
-Or put this in the redis.conf congiguration:
+Or put this in the redis.conf configuration:
 
 ```
 loadmodule /var/local/lib/imgscout.so
