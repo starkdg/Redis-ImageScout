@@ -4,7 +4,8 @@ A Redis module for indexing images.  The module accepts
 precomputed perceptual hashes of images and indexes them
 for fast efficient retrieval.  A perceptual hash is a
 fingerprint robust to small distortions - such as compression
-blurr, scaling, etc.  
+blurr, scaling, etc.  Useful for such things as duplicate
+detection and copyright protection of images.  
 
 
 ## Installation
