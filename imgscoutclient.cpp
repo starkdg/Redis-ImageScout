@@ -158,9 +158,10 @@ int DeleteId(redisContext *c, const string &key, const long long id){
 }
 
 void ProcessSubReply(redisReply *subreply){
-	if (subreply->type == REDIS_REPLY_ARRAY && subreply->elements == 2){
+	if (subreply->type == REDIS_REPLY_ARRAY && subreply->elements == 3){
 		cout << "        descr = " << subreply->element[0]->str << endl;
 		cout << "        id = " << subreply->element[1]->integer << endl;
+		cout << "        distance = " << subreply->element[2]->str << endl;
 	}
 }
 

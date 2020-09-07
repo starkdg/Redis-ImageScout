@@ -2,6 +2,7 @@
 #include <string>
 #include <ctime>
 #include <chrono>
+#include <list>
 #include "redismodule.h"
 #include "mvptree.hpp"
 
@@ -379,7 +380,7 @@ extern "C" int MVPTreeQuery_RedisCmd(RedisModuleCtx *ctx, RedisModuleString **ar
 	DataPoint target;
 	target.value = hash_value;
 
-	vector<DataPoint*> results;
+	list<QueryResult> results;
 	try {
 		results = tree->Query(target, radius);
 	} catch (exception &ex){
@@ -388,11 +389,12 @@ extern "C" int MVPTreeQuery_RedisCmd(RedisModuleCtx *ctx, RedisModuleString **ar
 	}
 	
 	RedisModule_ReplyWithArray(ctx, results.size());
-	for (DataPoint* dp: results){
-		RedisModuleString *reply_descr = GetDescriptionField(ctx, argv[1], dp->id);
-		RedisModule_ReplyWithArray(ctx, 2);
+	for (QueryResult &r: results){
+		RedisModuleString *reply_descr = GetDescriptionField(ctx, argv[1], r.dp->id);
+		RedisModule_ReplyWithArray(ctx, 3);
 		RedisModule_ReplyWithString(ctx, reply_descr);
-		RedisModule_ReplyWithLongLong(ctx, dp->id);
+		RedisModule_ReplyWithLongLong(ctx, r.dp->id);
+		RedisModule_ReplyWithDouble(ctx, r.distance);
 	}
 
 	// calculate pct of distance operations

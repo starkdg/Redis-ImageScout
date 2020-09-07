@@ -27,4 +27,20 @@ struct DataPoint {
 	}
 };
 
+struct QueryResult {
+	DataPoint *dp;
+	double distance;
+	QueryResult():dp(NULL),distance(0){};
+	QueryResult(const QueryResult &other){
+		dp = other.dp;
+		distance = other.distance;
+	}
+	QueryResult& operator=(const QueryResult &other){
+		dp = other.dp;
+		distance = other.distance;
+		return *this;
+	}
+};
+
+
 #endif /* _DATAPOINT_H */ 

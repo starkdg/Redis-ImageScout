@@ -188,8 +188,8 @@ void MVPTree::Clear(){
 	m_ids.clear();
 }
 
-const vector<DataPoint*> MVPTree::Query(const DataPoint &target, const double radius) const{
-	vector<DataPoint*> results;
+const list<QueryResult> MVPTree::Query(const DataPoint &target, const double radius) const{
+	list<QueryResult> results;
 	
 	map<int, MVPNode*> currnodes, childnodes;
 	if (m_top != NULL) currnodes[0] = m_top;

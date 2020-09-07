@@ -20,6 +20,8 @@ public:
 	static MVPNode* CreateNode(vector<DataPoint*> &points,
 							   map<int,vector<DataPoint*>*> &childpoints,
 							   int level, int index);
+
+	void InsertItemIntoList(list<QueryResult> &list, QueryResult &item)const;
 	
 	virtual MVPNode* AddDataPoints(vector<DataPoint*> &points,
 								   map<int,vector<DataPoint*>*> &childpoints,
@@ -41,7 +43,7 @@ public:
 							  const double radius,
 							  map<int, MVPNode*> &childnodes,
 							  const int index,
-							  vector<DataPoint*> &results)const = 0;
+							  list<QueryResult> &results)const = 0;
 
 	virtual const vector<DataPoint*> PurgeDataPoints()=0;
 
@@ -89,7 +91,7 @@ public:
 	void TraverseNode(const DataPoint &target,const double radius,
 							  map<int, MVPNode*> &childnodes,
 							  const int index,
-							  vector<DataPoint*> &results)const;
+							  list<QueryResult> &results)const;
 
 	const vector<DataPoint*> PurgeDataPoints();
 };
@@ -127,7 +129,7 @@ public:
 	void TraverseNode(const DataPoint &target,const double radius,
 					  map<int, MVPNode*> &childnodes,
 					  const int index,
-					  vector<DataPoint*> &results)const;
+					  list<QueryResult> &results)const;
 
 	const vector<DataPoint*> PurgeDataPoints();
 };

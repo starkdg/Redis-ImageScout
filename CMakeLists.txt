@@ -7,7 +7,7 @@ include(ExternalProject)
 set(MODULE_SRCS module.cpp mvptree.cpp mvpnode.cpp)
 set(CMAKE_INSTALL_PREFIX /var/local)
 
-set(CMAKE_BUILD_TYPE DEBUG)
+set(CMAKE_BUILD_TYPE RelWithDebInfo)
 
 add_library(imgscout MODULE ${MODULE_SRCS})
 set_target_properties(imgscout PROPERTIES PREFIX "")
@@ -64,8 +64,10 @@ message("PHASHLIB = ${PHASHLIB}")
 add_executable(imgscoutclient imgscoutclient.cpp)
 target_include_directories(imgscoutclient PRIVATE ${Boost_INCLUDE_DIRS} ${HIREDIS_INCLUDE_DIR})
 target_link_libraries(imgscoutclient ${Boost_LIBRARIES} ${PHASHLIB} ${PNGLIB} ${JPEGLIB} ${TIFFLIB}
-       ${HIREDIS_LIB})
+  ${HIREDIS_LIB})
 
 
-install(TARGETS imgscout DESTINATION lib)
+install(TARGETS imgscout
+  DESTINATION /var/local/lib
+  PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 

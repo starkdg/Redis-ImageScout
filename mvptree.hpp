@@ -1,7 +1,10 @@
 #ifndef _MVPTREE_H
 #define _MVPTREE_H
 
+#include <list>
 #include "mvpnode.hpp"
+
+using namespace std;
 
 class MVPTree {
 private:
@@ -39,7 +42,7 @@ public:
 	
 	void Clear();
 
-	const vector<DataPoint*> Query(const DataPoint &target, const double radius) const;
+	const list<QueryResult> Query(const DataPoint &target, const double radius) const;
 
 	void Print()const;
 

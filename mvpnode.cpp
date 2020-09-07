@@ -3,13 +3,8 @@
 #include "mvpnode.hpp"
 
 static double PointDistance(const DataPoint *a, const DataPoint *b){
-	unsigned long long xord = (a->value)^(b->value);
-	unsigned int c = 0;
 	MVPTree::n_ops++;
-	for (c = 0;xord;c++){
-		xord &= xord - 1;
-	}
-	return c;
+	return __builtin_popcountll((a->value)^(b->value));
 }
 
 bool CompareDistance(const double a, const double b, const bool less){
@@ -32,6 +27,19 @@ MVPNode* MVPNode::CreateNode(vector<DataPoint*> &points,
 	node = node->AddDataPoints(points, childpoints, level, index);
 	if (node == NULL) throw runtime_error("unable to create node");
 	return node;
+}
+
+void MVPNode::InsertItemIntoList(list<QueryResult> &list, QueryResult &item)const{
+	auto iter = list.begin();
+	for ( ;iter != list.end();iter++){
+		if (item.distance <= iter->distance){
+			list.insert(iter, item);
+			break;
+		}
+	}
+	if (iter == list.end()){
+		list.insert(iter, item);
+	}
 }
 
 /********** MVPInternal methods *******************/
@@ -192,14 +200,18 @@ const vector<DataPoint*> MVPInternal::GetDataPoints()const{
 const vector<DataPoint*> MVPInternal::FilterDataPoints(const DataPoint *target, const double radius)const{
 	vector<DataPoint*> results;
 	for (int i=0;i<m_nvps;i++){
-		if (m_vps[i]->active && PointDistance(target, m_vps[i]) <= radius)
+		if (!m_vps[i]->active) continue;
+		double d = PointDistance(target, m_vps[i]);
+		if (d <= radius){
 			results.push_back(m_vps[i]);
+		}
 	}
+
 	return results;
 }
 
 void MVPInternal::TraverseNode(const DataPoint &target, const double radius, map<int, MVPNode*> &childnodes,
-							   const int index, vector<DataPoint*> &results)const{
+							   const int index, list<QueryResult> &results)const{
 	int lengthM = MVP_BRANCHFACTOR - 1;
 	int n = 0;
 	bool *currnodes  = new bool[1];
@@ -211,8 +223,12 @@ void MVPInternal::TraverseNode(const DataPoint &target, const double radius, map
 		for (int i=0;i<n_childnodes;i++) nextnodes[i] = false;
 
 		double d = PointDistance(m_vps[n], &target);
-		if (m_vps[n]->active && d <= radius)
-			results.push_back(m_vps[n]);
+		if (m_vps[n]->active && d <= radius){
+			QueryResult r;
+			r.dp = m_vps[n];
+			r.distance = d;
+			InsertItemIntoList(results, r);
+		}
 
 		int lengthMn = lengthM*n_nodes;
 		for (int node_index=0;node_index<n_nodes;node_index++){
@@ -354,8 +370,9 @@ const vector<DataPoint*> MVPLeaf::FilterDataPoints(const DataPoint *target, cons
 	double qdists[MVP_PATHLENGTH];
 	for (int i=0;i<m_nvps;i++){
 		qdists[i] = PointDistance(m_vps[i], target);
-		if (m_vps[i]->active && qdists[i] <= radius)
+		if (m_vps[i]->active && qdists[i] <= radius){
 			results.push_back(m_vps[i]);
+		}
 	}
 	
 	for (int j=0;j < (int)m_points.size();j++){
@@ -369,21 +386,50 @@ const vector<DataPoint*> MVPLeaf::FilterDataPoints(const DataPoint *target, cons
 			}
 		}
 		if (!skip){
-			if (PointDistance(m_points[j], target) <= radius){
+			double d = PointDistance(m_points[j], target);
+			if (d <= radius){
 				results.push_back(m_points[j]);
 			}
 		}
 	}
-	
 	return results;
 }
 
 
 void MVPLeaf::TraverseNode(const DataPoint &target, const double radius,
 						   map<int, MVPNode*> &childnodes,
-						   const int index, vector<DataPoint*> &results)const{
-	vector<DataPoint*> fnd = FilterDataPoints(&target, radius);
-	for (DataPoint* dp : fnd) results.push_back(dp);
+						   const int index, list<QueryResult> &results)const{
+	double qdists[MVP_PATHLENGTH];
+	for (int i=0;i<m_nvps;i++){
+		qdists[i] = PointDistance(m_vps[i], &target);
+		if (m_vps[i]->active && qdists[i] <= radius){
+			QueryResult item;
+			item.dp = m_vps[i];
+			item.distance = qdists[i];
+			InsertItemIntoList(results, item);
+		}
+	}
+	
+	for (int j=0;j < (int)m_points.size();j++){
+		bool skip = false;
+		if (!m_points[j]->active) continue;
+		
+		for (int i=0;i<m_nvps;i++){
+			if (!(m_pdists[i][j] >= qdists[i] - radius) && (m_pdists[i][j] <= qdists[i] + radius)){
+				skip = true;
+				break;
+			}
+		}
+		if (!skip){
+			double d = PointDistance(m_points[j], &target);
+			if (d <= radius){
+				QueryResult item;
+				item.dp = m_points[j];
+				item.distance = d;
+				InsertItemIntoList(results, item);
+			}
+		}
+	}
 }
 
 const vector<DataPoint*> MVPLeaf::PurgeDataPoints(){
