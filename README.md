@@ -10,6 +10,13 @@ detection and copyright protection of images.
 
 ## Installation
 
+Build and run a docker image:
+
+```
+docker build --tag imgscout:0.1 .
+docker run --detach --publish 6379:6379 --mount src=imgscoutdata,dst=/data --name imgscout imgscout:0.1
+```
+
 The client demo program requires the following dependencies
 pre-installed:
 
@@ -38,7 +45,7 @@ make install
 To load/unload the module into Redis:
 
 ```
-module load /var/local/lib/imgscout.so
+module load /usr/local/lib/imgscout.so
 module unload imgscout
 module list
 ```
